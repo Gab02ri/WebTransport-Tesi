@@ -1,0 +1,1 @@
+chromium --ignore-certificate-errors-spki-list=cLA52pVcTJdU1zBY1JXbSgxvcnwuE6HSDqSt+qFe3Gw= --ignore-certificate-errors --v=2 --enable-logging=stderr --origin-to-force-quic-on=127.0.0.1:4000
