@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "checkJs": true,
+      "module": "commonjs",
+      "target": "es6",
+      "strict": false,
+      "noEmit": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "allowSyntheticDefaultImports": true
+    },
+    "exclude": [
+      "/home/gabriele/Scrivania/WebTransport/node_modules/@fails-components/webtransport-transport-http3-quiche/dist/lib"
+    ]
+  }

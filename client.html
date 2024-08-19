@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebTransport Client</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    #log { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>WebTransport Client</h1>
+  <button id="connectButton">Connect</button>
+  <button id="sendMessageButton" disabled>Send Message</button>
+  <div id="log"></div>
+
+  <script>
+    // Seleziona gli elementi del DOM
+    const logDiv = document.getElementById('log');
+    const connectButton = document.getElementById('connectButton');
+    const sendMessageButton = document.getElementById('sendMessageButton');
+
+
+    connectButton.addEventListener('click', async () => {
+      try {
+        // Crea una connessione WebTransport
+         const transport = new WebTransport('https://127.0.0.1:4000');
+        
+        // Aspetta che la connessione sia stabilita
+        await transport.ready;
+        
+        //console.log(transport);
+
+        log('Connected to server.');
+        //sendMessageButton.disabled = false;
+        
+        //invio un datagramma
+
+        // let writer=transport.datagrams.writable.getWriter();
+        // let encoder= new TextEncoder();
+        // await writer.ready;
+        // writer.write(encoder.encode("ciao"));
+
+        //ricezione stream
+
+        const dupstream= await transport.incomingBidirectionalStreams;
+        console.log(dupstream);
+        const dupReader=dupstream.getReader();
+        const stream=await dupReader.read();
+        console.log(stream);
+        const reader=stream.value.readable.getReader();
+        const writer=stream.value.writable.getWriter();
+
+        await writer.ready;
+        let encoder= new TextEncoder();
+        writer.write(encoder.encode("ciao"));
+
+        //ascolta sulla stream
+
+        let messaggio=await reader.read();
+        console.log(messaggio);
+        const decoder=new TextDecoder();
+        console.log(decoder.decode(messaggio.value));
+
+
+      
+        // Ascolta i datagrammi dal server
+
+
+        // const decoder=new TextDecoder();
+        
+        // for await(const datagramma of transport.datagrams.readable)
+        // {
+        //   console.log(decoder.decode(datagramma));
+        // }
+
+        //const stream = await transport.receiveStream();
+        //const reader = stream.getReader();
+        
+        // (async () => {
+        //   while (true) {
+        //     const { value, done } = await reader.read();
+        //     if (done) break;
+        //     log(`Received: ${new TextDecoder().decode(value)}`);
+        //   }
+        // })();
+        
+      } catch (error) {
+        log(`Connection failed: ${error.message}`);
+      }
+    });
+
+    // sendMessageButton.addEventListener('click', async () => {
+    //   if (!transport) return;
+
+    //   try {
+    //     // Invia un messaggio al server
+    //     const message = 'Hello, server!';
+    //     const writer = transport.createSendStream().getWriter();
+    //     writer.write(new TextEncoder().encode(message));
+    //     writer.close();
+        
+    //     log('Message sent.');
+    //   } catch (error) {
+    //     log(`Failed to send message: ${error.message}`);
+    //   }
+    // });
+
+    function log(message) {
+      const timestamp = new Date().toISOString();
+      logDiv.innerHTML += `<p>[${timestamp}] ${message}</p>`;
+    }
+  </script>
+</body>
+</html>
