@@ -34,6 +34,31 @@
 
         log('Connected to server.');
         //sendMessageButton.disabled = false;
+
+        //CREAZIONE STREAM BIDIREZIONALE
+        // const stream=await transport.createBidirectionalStream();
+        // const writer= stream.writable.getWriter();
+        // const encoder= new TextEncoder();
+        // await writer.ready;
+        // writer.write(encoder.encode('Zero'));
+
+        //CREAZIONE STREAM UNIDIREZIONALE
+        // const stream=await transport.createUnidirectionalStream();
+        // const writer= stream.getWriter();
+        // const encoder= new TextEncoder();
+        // await writer.ready;
+        // writer.write(encoder.encode('SPARKING'));
+
+        //RICEZIONE STREAM UNIDIREZIONALE
+
+        const unistream=transport.incomingUnidirectionalStreams;
+        const Streamreader= unistream.getReader();
+        const unidirectionalStream= await Streamreader.read();
+        const reader=unidirectionalStream.value.getReader();
+        const decoder=new TextDecoder();
+        let message= await reader.read();
+        console.log(decoder.decode(message.value));
+
         
         //invio un datagramma
 
@@ -44,24 +69,24 @@
 
         //ricezione stream
 
-        const dupstream= await transport.incomingBidirectionalStreams;
-        console.log(dupstream);
-        const dupReader=dupstream.getReader();
-        const stream=await dupReader.read();
-        console.log(stream);
-        const reader=stream.value.readable.getReader();
-        const writer=stream.value.writable.getWriter();
+        // const dupstream= await transport.incomingBidirectionalStreams;
+        // console.log(dupstream);
+        // const dupReader=dupstream.getReader();
+        // const stream=await dupReader.read();
+        // console.log(stream);
+        // const reader=stream.value.readable.getReader();
+        // const writer=stream.value.writable.getWriter();
 
-        await writer.ready;
-        let encoder= new TextEncoder();
-        writer.write(encoder.encode("ciao"));
+        // await writer.ready;
+        // let encoder= new TextEncoder();
+        // writer.write(encoder.encode("ciao"));
 
-        //ascolta sulla stream
+        // //ascolta sulla stream
 
-        let messaggio=await reader.read();
-        console.log(messaggio);
-        const decoder=new TextDecoder();
-        console.log(decoder.decode(messaggio.value));
+        // let messaggio=await reader.read();
+        // console.log(messaggio);
+        // const decoder=new TextDecoder();
+        // console.log(decoder.decode(messaggio.value));
 
 
       
