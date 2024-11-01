@@ -65,21 +65,21 @@ async function main() {
 
     //Ricezione di uno stream unidirezionale
 
-    const receiveStream=session.value.incomingUnidirectionalStreams;
-    const streamReader=receiveStream.getReader();
-    const unidirectionalStream= await streamReader.read();
-    const reader=unidirectionalStream.value.getReader();
-    const decoder= new TextDecoder();
-    let messaggio=await reader.read();
-    console.log(decoder.decode(messaggio.value));
+    // const receiveStream=session.value.incomingUnidirectionalStreams;
+    // const streamReader=receiveStream.getReader();
+    // const unidirectionalStream= await streamReader.read();
+    // const reader=unidirectionalStream.value.getReader();
+    // const decoder= new TextDecoder();
+    // let messaggio=await reader.read();
+    // console.log(decoder.decode(messaggio.value));
 
     //Creazione di uno stream unidirezionale
 
-    // const receiveStream=await session.value.createUnidirectionalStream();
-    // const writer=receiveStream.getWriter();
-    // const encoder=new TextEncoder();
-    // await writer.ready;
-    // writer.write(encoder.encode('8 ottobre'));
+    const receiveStream=await session.value.createUnidirectionalStream();
+    const writer=receiveStream.getWriter();
+    const encoder=new TextEncoder();
+    await writer.ready;
+    writer.write(encoder.encode('8 ottobre'));
 
 
 
