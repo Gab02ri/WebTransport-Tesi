@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script>
+        function funz () {
+            let video=document.getElementById("video");
+            console.log(video);
+
+            navigator.mediaDevices.getUserMedia({video:true, audio:true})
+            .then((stream)=>{
+
+                video.srcObject=stream;
+                connetti(stream);
+                video.play();
+
+            })
+            .catch((error)=>{
+
+                console.error(`Error occured: ${error}`);
+
+            });
+            
+
+            
+        }
+        let transport;
+
+        async function connetti (videoStream) {
+
+             transport = new WebTransport('https://127.0.0.1:4000');
+             await transport.ready;
+             console.log("Connesso");
+
+             //CREAZIONE STREAM BIDIREZIONALE
+
+            const stream=await transport.createBidirectionalStream();
+            const writer= stream.writable.getWriter();
+            await writer.ready;
+            captureFrames(writer);
+
+
+            
+        }
+
+
+        async function captureFrames(writer) {
+            const video = document.getElementById("video");
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+
+            const capture = async () => {
+                // Disegniamo il frame attuale del video sul canvas
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                // Convertiamo il canvas in un Blob
+                const blob = await new Promise(resolve => {
+                    canvas.toBlob(resolve, 'image/jpeg', 0.9); // Converte il canvas in un Blob JPEG
+                });
+
+                if (blob) {
+                    // Convertiamo il Blob in ArrayBuffer
+                    const arrayBuffer = await blob.arrayBuffer();
+                    console.log('Frame catturato e convertito in ArrayBuffer', arrayBuffer);
+                    
+                    // Inviamo l'ArrayBuffer attraverso il writer
+                    console.log(arrayBuffer);
+                    await writer.write(arrayBuffer);
+                }
+
+                requestAnimationFrame(capture); // Richiama la funzione nel prossimo frame
+            };
+
+            capture(); // Inizia il ciclo di cattura e invio
+        }
+
+
+
+    </script>
+
+</head>
+
+<body>
+
+    <video id="video"></video>
+    <button id="start" onclick="funz()">start</button>
+    <canvas id="canvas" width="640" height="480"></canvas>
+
+    
+</body>
+
+
+
+
+</html>
