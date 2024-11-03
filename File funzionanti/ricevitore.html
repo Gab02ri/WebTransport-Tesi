@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script>
+
+        let transport;
+        let mediaSource;
+        let sourceBuffer;
+        let video;
+
+        async function connetti() {
+
+            transport = new WebTransport('https://127.0.0.1:4000');
+
+            await transport.ready;
+            console.log("Connesso");
+
+
+            video = document.getElementById("video");
+            mediaSource = new MediaSource();
+            video.src = URL.createObjectURL(mediaSource);
+
+            const stream = await transport.createBidirectionalStream();
+            const reader = stream.readable.getReader();
+
+            mediaSource.addEventListener("sourceopen", () => {
+
+                sourceopen(reader);
+
+            });
+
+
+
+
+
+        }
+
+
+        let coda = [];
+
+        async function sourceopen(reader) {
+
+            sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs=vp8,opus');
+            sourceBuffer.addEventListener("updateend", () => {
+                //mediaSource.endOfStream();
+                video.play();
+                //console.log(mediaSource.readyState);
+                processCoda();
+
+            })
+
+          
+
+            while (true) {
+
+                buffer = await reader.read();
+                coda.push(buffer.value);
+                processCoda();
+                console.log(buffer.value);
+                console.log(buffer.value.length);
+
+
+
+
+            }
+
+
+
+
+        }
+
+        function processCoda() {
+
+            let buffer;
+
+            if (coda.length > 0 && !sourceBuffer.updating) {
+
+                buffer= coda.shift();
+                sourceBuffer.appendBuffer(buffer);
+
+
+            }
+
+        }
+
+
+
+    </script>
+
+
+</head>
+
+<body>
+
+    <video id="video" autoplay></video>
+    <button id="start" onclick="connetti()">start</button>
+
+
+</body>
+
+</html>

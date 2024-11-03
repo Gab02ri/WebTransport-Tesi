@@ -1,0 +1,124 @@
+    <!DOCTYPE html>
+    <html>
+
+    <head>
+        <script>
+            function funz () {
+                let video=document.getElementById("video");
+                console.log(video);
+
+                navigator.mediaDevices.getUserMedia({video:true, audio:true})
+                .then((stream)=>{
+
+                    video.srcObject=stream;
+                    video.play();
+                    videoStream=stream;
+
+                })
+                .catch((error)=>{
+
+                    console.error(`Error occured: ${error}`);
+
+                });
+                
+
+                
+            }
+
+            let transport;
+            let videoStream;
+
+            async function connetti () {
+
+                transport = new WebTransport('https://127.0.0.1:4000');
+                await transport.ready;
+                console.log("Connesso");
+                
+            }
+
+            async function inzioinvio() {
+
+                  //CREAZIONE STREAM BIDIREZIONALE
+                const stream=await transport.createBidirectionalStream();
+                const writer= stream.writable.getWriter();
+                await writer.ready;
+
+                let Arrayuint8
+
+                const mediaRecorder= new MediaRecorder(videoStream,{ mimeType: 'video/webm; codecs=vp8,opus' });
+
+                mediaRecorder.ondataavailable=  (event)=>{
+                    event.data.arrayBuffer().then(async (buffer)=>{
+
+                        Arrayuint8=new Uint8Array(buffer);
+                        console.log(Arrayuint8.length);
+                        await writer.write(Arrayuint8);
+
+
+                    })
+
+                    
+
+                }
+
+                mediaRecorder.start(33);
+
+                
+                
+            }
+
+        </script>
+
+    </head>
+
+    <body>
+
+
+        <video id="video" width="640" height="360" muted></video>
+        <canvas id="canvas" width="640" height="360"></canvas>
+        <button id="capture-frame">Cattura Frame</button>   <button onclick="funz()">start</button> 
+        <button onclick="connetti()">Connetti</button>     <button onclick="inzioinvio()">invio</button>
+        <img id="output" />
+        <img id="array"/>
+
+    <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const output = document.getElementById("output");
+    const imgarr=document.getElementById("array");
+
+    document.getElementById("capture-frame").addEventListener("click", () => {
+        // Disegna il frame corrente del video sulla canvas
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Ottieni i dati dell'immagine dal canvas
+        const frameData = canvas.toBlob((blob)=>{
+
+            blob.arrayBuffer().then((buffer)=>{
+
+                console.log(buffer);
+                let imgBlob=new Blob([buffer],{type:'image/jpg'});
+                let imageurl=URL.createObjectURL(imgBlob);
+                imgarr.src=imageurl;
+
+
+            });
+
+
+        });
+        
+        // Visualizza il frame estratto in un elemento img
+        output.src = frameData;
+        
+    });
+    </script>
+
+
+        
+    </body>
+
+
+
+
+    </html>
